@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: hostel_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: hostel_finder
+      MYSQL_USER: hostel_user
+      MYSQL_PASSWORD: hostel_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts:/docker-entrypoint-initdb.d
+    networks:
+      - hostel_network
+
+  # Next.js Application
+  app:
+    build: .
+    container_name: hostel_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: hostel_user
+      MYSQL_PASSWORD: hostel_password
+      MYSQL_DATABASE: hostel_finder
+    depends_on:
+      - mysql
+    networks:
+      - hostel_network
+
+volumes:
+  mysql_data:
+
+networks:
+  hostel_network:
+    driver: bridge
